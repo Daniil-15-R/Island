@@ -386,6 +386,12 @@ class Island(var width: Int, var height: Int) {
                         messages.add("${animal.unicodeSymbol} съел траву в клетке ($i, $j) и стал сытым на ${animal.satiety}/${animal.getMaxSatiety()}")
                     }
                 }
+
+                // Восстановление травы с вероятностью 10% после того, как её съели
+                if (!cell.hasGrass && ThreadLocalRandom.current().nextDouble() < 0.1) {
+                    cell.hasGrass = true
+                    messages.add("Трава выросла в клетке ($i, $j)")
+                }
             }
         }
         return messages
@@ -402,6 +408,8 @@ class Island(var width: Int, var height: Int) {
             val x = ThreadLocalRandom.current().nextInt(width)
             val y = ThreadLocalRandom.current().nextInt(height)
             val cell = grid[x][y]
+
+            // Проверяем, что в клетке есть свободное место для нового животного
             if (cell.animals.size < 5) {
                 val newAnimal = when (animalClass) {
                     Wolf::class -> Wolf()
@@ -425,7 +433,7 @@ class Island(var width: Int, var height: Int) {
                 if (newAnimal != null) {
                     cell.animals.add(newAnimal)
                     messages.add("${newAnimal.unicodeSymbol} родился в клетке ($x, $y)")
-                    deadAnimals.remove(animalClass)
+                    deadAnimals.remove(animalClass) // Удаляем запись о смерти, чтобы не рождались повторно
                 }
             }
         }
